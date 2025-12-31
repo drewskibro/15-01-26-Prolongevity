@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Real Patient Outcomes - ProLongevity</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>
+    tailwind.config = {
+      content: [],
+      theme: {
+        extend: {
+          fontFamily: {
+            dm_sans: ['DM Sans', 'sans-serif'],
+            playfair_display: ['Playfair Display', 'Georgia', 'serif'],
+            font_awesome_6_free: ['Font Awesome 6 Free']
+          },
+          colors: {
+            'prolongevity-purple': '#3a126e',
+            'prolongevity-lime': '#79bb1d',
+            'prolongevity-teal': '#209c91',
+            'prolongevity-dark': '#1a0b2e',
+            'off-white': '#fcfcfc'
+          },
+          boxShadow: {
+            'glow-purple': '0 0 80px -20px rgba(58, 18, 110, 0.4)',
+            'glow-lime': '0 0 80px -20px rgba(121, 187, 29, 0.4)',
+            'glow-teal': '0 0 80px -20px rgba(32, 156, 145, 0.4)',
+            'premium': '0 20px 40px -10px rgba(0, 0, 0, 0.05)'
+          },
+          backgroundImage: {
+            'noise': "url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22 opacity=%220.05%22/%3E%3C/svg%3E')"
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    @font-face {
+      font-family: 'Playfair Display';
+      src: url('https://fonts.gstatic.com/s/playfairdisplay/v40/nuFiD-vYSZviVYUb_rj3ij__anPXDTzYgA.woff2') format("woff2");
+      font-weight: 400 800;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: 'DM Sans';
+      src: url('https://fonts.gstatic.com/s/dmsans/v17/rP2Yp2ywxg089UriI5-g4vlH9VoD8Cmcqbu0-K4.woff2') format("woff2");
+      font-weight: 400 500 700;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    * {
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background-color: #fcfcfc;
+    }
+
+    /* Noise Overlay */
+    .bg-noise-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.4;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.08'/%3E%3C/svg%3E");
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideInLeft {
+      from { opacity: 0; transform: translateX(-20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes drawLine {
+      from { width: 0; }
+      to { width: 100%; }
+    }
+
+    @keyframes scaleIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .animate-fade-in-up {
+      animation: fadeInUp 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      opacity: 0;
+    }
+
+    .animate-slide-in-left {
+      animation: slideInLeft 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      opacity: 0;
+    }
+
+    .animate-scale-in {
+      animation: scaleIn 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      opacity: 0;
+    }
+
+    .delay-100 { animation-delay: 0.1s; }
+    .delay-200 { animation-delay: 0.2s; }
+    .delay-300 { animation-delay: 0.3s; }
+    .delay-400 { animation-delay: 0.4s; }
+    .delay-500 { animation-delay: 0.5s; }
+
+    /* Section Header */
+    .section-header {
+      position: relative;
+      display: inline-block;
+    }
+
+    .section-header::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      bottom: -8px;
+      height: 2px;
+      background: linear-gradient(90deg, var(--tw-gradient-stops, #209c91, #209c91) 0%, transparent 100%);
+      animation: drawLine 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    /* Navigation */
+    .nav-link {
+      position: relative;
+      transition: color 0.3s ease;
+    }
+    .nav-link:hover { color: #3a126e; }
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      bottom: -4px;
+      width: 0;
+      height: 2px;
+      background: #3a126e;
+      transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .nav-link:hover::after { width: 100%; }
+    .nav-link-active { color: #3a126e; font-weight: 700; }
+    .nav-link-active::after { width: 100%; }
+
+    /* Hover Effects */
+    .hover-lift {
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .hover-lift:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 40px -10px rgba(58, 18, 110, 0.15);
+    }
+  </style>
+</head>
+<body class="bg-off-white text-slate-900 antialiased selection:bg-prolongevity-purple selection:text-white">
+
+  <!-- Noise Overlay -->
+  <div class="bg-noise-overlay"></div>
+
+  <!-- Navigation -->
+  <nav class="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-xl shadow-sm border-b border-gray-100 transition-all duration-300">
+    <div class="max-w-[1680px] mx-auto px-6 md:px-[60px] h-[90px] flex items-center justify-between">
+      <a href="index.html" class="flex items-center gap-5 shrink-0 hover:opacity-80 transition-opacity">
+        <img src="https://c.animaapp.com/mid2jdlgjgsquY/img/prolongevity-logo.png" alt="ProLongevity" class="h-[50px] object-contain" />
+      </a>
+
+      <nav class="hidden lg:flex items-center gap-12">
+        <a href="index.html#programme" class="nav-link text-slate-600 text-[15px] font-medium tracking-wide">Our Programme</a>
+        <a href="outcomes.html" class="nav-link-active text-[15px] font-medium tracking-wide">Results</a>
+        <a href="index.html#science" class="nav-link text-slate-600 text-[15px] font-medium tracking-wide">The Science</a>
+        <a href="pricing.html" class="nav-link text-slate-600 text-[15px] font-medium tracking-wide">Pricing</a>
+      </nav>
+
+      <div class="hidden lg:flex items-center">
+        <a href="pricing.html" class="flex items-center gap-2 text-white text-[15px] font-semibold px-7 py-3.5 rounded-full shadow-lg hover:shadow-xl transition-all hover-lift" style="background: linear-gradient(135deg, #209c91 0%, #1a8078 100%);">
+          Get Started
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- 1. HERO SECTION (Direct Response Style) -->
+  <section class="relative w-full min-h-[90vh] flex items-center overflow-hidden bg-prolongevity-dark">
+    <!-- Atmospheric Background Effects -->
+    <div class="absolute inset-0 bg-gradient-to-br from-prolongevity-dark via-purple-900/90 to-prolongevity-dark -z-20"></div>
+    <div class="absolute top-0 right-0 w-[1000px] h-[1000px] bg-purple-600/20 rounded-full blur-[150px] -z-10 opacity-60 pointer-events-none animate-pulse"></div>
+    <div class="absolute bottom-0 left-0 w-[800px] h-[800px] bg-teal-500/10 rounded-full blur-[120px] -z-10 opacity-40 pointer-events-none"></div>
+    
+    <!-- Noise Texture Overlay -->
+    <div class="absolute inset-0 opacity-[0.03] pointer-events-none -z-10" style="background-image: url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.8%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22 opacity=%220.08%22/%3E%3C/svg%3E');"></div>
+
+    <div class="max-w-[1680px] mx-auto px-6 md:px-[60px] relative z-10 py-32">
+      <div class="flex flex-col items-center text-center">
+        
+        <!-- Badge -->
+        <div class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 px-4 py-2 rounded-full mb-8 animate-slide-in-left delay-100">
+          <i class="fas fa-check-circle text-[#209c91]"></i>
+          <span class="text-white text-sm font-bold tracking-wide uppercase">Verified Clinical Outcomes</span>
+        </div>
+
+        <!-- Headline - The "Big Promise" -->
+        <h1 class="text-white text-[48px] lg:text-[80px] font-bold tracking-tight leading-[1.05] mb-8 font-playfair_display animate-fade-in-up delay-200">
+          They Said I'd Be On <br/>
+          <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#209c91] to-[#4fd1c5]">Meds Forever.</span>
+        </h1>
+        
+        <!-- Subheadline - The "Mechanism" -->
+        <p class="text-slate-300 text-lg md:text-[24px] leading-relaxed max-w-[900px] mb-12 font-light animate-fade-in-up delay-300">
+          See how 1,000+ members reversed Type 2 Diabetes, dropped blood pressure medication, and lost weight permanently—<span class="text-white font-bold">without Ozempic, hunger, or willpower.</span>
+        </p>
+
+        <!-- CTA Stack -->
+        <div class="flex flex-col md:flex-row items-center gap-6 mb-16 animate-fade-in-up delay-400">
+          <button class="group relative flex items-center justify-center gap-3 text-white text-[19px] font-bold px-12 py-5 rounded-full shadow-2xl transition-all duration-500 hover:-translate-y-2 hover:scale-105 overflow-hidden" style="background: linear-gradient(135deg, #209c91 0%, #1a8078 100%); box-shadow: 0 20px 60px rgba(32, 156, 145, 0.3);">
+            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+            <span class="relative z-10 flex items-center gap-3">
+              Start Your Transformation
+              <i class="fas fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+            </span>
+          </button>
+          
+          <div class="flex items-center gap-4 text-white/80 text-sm font-medium">
+            <div class="flex -space-x-3">
+              <div class="w-10 h-10 rounded-full border-2 border-prolongevity-dark bg-gray-200"></div>
+              <div class="w-10 h-10 rounded-full border-2 border-prolongevity-dark bg-gray-300"></div>
+              <div class="w-10 h-10 rounded-full border-2 border-prolongevity-dark bg-gray-400 flex items-center justify-center text-xs text-black font-bold">+1k</div>
+            </div>
+            <p>Join 1,000+ Success Stories</p>
+          </div>
+        </div>
+
+        <!-- The "Proof Bar" -->
+        <div class="w-full max-w-[1200px] grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 border-t border-white/10 pt-12 animate-fade-in-up delay-500">
+          <div class="text-center">
+            <p class="text-4xl md:text-5xl font-bold text-white mb-1 font-playfair_display">15pts</p>
+            <p class="text-slate-400 text-sm uppercase tracking-wider">Avg. HbA1c Reduction</p>
+          </div>
+          <div class="text-center">
+            <p class="text-4xl md:text-5xl font-bold text-white mb-1 font-playfair_display">12cm</p>
+            <p class="text-slate-400 text-sm uppercase tracking-wider">Avg. Waist Reduction</p>
+          </div>
+          <div class="text-center">
+            <p class="text-4xl md:text-5xl font-bold text-white mb-1 font-playfair_display">85%</p>
+            <p class="text-slate-400 text-sm uppercase tracking-wider">Medication Reduced</p>
+          </div>
+          <div class="text-center">
+            <p class="text-4xl md:text-5xl font-bold text-white mb-1 font-playfair_display">100%</p>
+            <p class="text-slate-400 text-sm uppercase tracking-wider">Science Backed</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. THE COMPARISON (The "Mechanism" - Us vs Them) -->
+  <section class="relative bg-white py-32 overflow-hidden">
+    <div class="max-w-[1200px] mx-auto px-6 relative z-10">
+      
+      <div class="text-center mb-20">
+        <div class="inline-block mb-6">
+          <div class="section-header" style="--tw-gradient-stops: #209c91, #209c91;">
+            <p class="font-bold tracking-[3px] text-sm uppercase" style="color: #209c91;">THE 12-MONTH TRAJECTORY</p>
+          </div>
+        </div>
+        <h2 class="text-gray-900 text-4xl md:text-6xl font-bold font-playfair_display mb-6 leading-tight">
+          Why Diets & Drugs <span class="text-red-500">Fail</span> <br/>
+          vs. Why We <span class="text-[#209c91]">Succeed</span>
+        </h2>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-0 md:gap-8 items-stretch">
+        
+        <!-- The Old Way (Pain) -->
+        <div class="bg-slate-50 border border-slate-200 rounded-t-[2rem] md:rounded-[2rem] p-10 relative overflow-hidden group">
+          <div class="absolute top-0 left-0 w-full h-2 bg-red-500"></div>
+          <h3 class="text-gray-900 text-2xl font-bold mb-2 font-playfair_display">The "Medical" Route</h3>
+          <p class="text-slate-500 text-sm font-bold uppercase tracking-wider mb-8">Mounjaro / Ozempic / Keto</p>
+          
+          <ul class="space-y-6">
+            <li class="flex gap-4">
+              <div class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center shrink-0 text-red-500 font-bold">
+                <i class="fas fa-times"></i>
+              </div>
+              <div>
+                <p class="font-bold text-gray-900">Muscle Wasting</p>
+                <p class="text-slate-600 text-sm">Up to 40% of weight lost is lean muscle, destroying your metabolism.</p>
+              </div>
+            </li>
+            <li class="flex gap-4">
+              <div class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center shrink-0 text-red-500 font-bold">
+                <i class="fas fa-times"></i>
+              </div>
+              <div>
+                <p class="font-bold text-gray-900">The Rebound Effect</p>
+                <p class="text-slate-600 text-sm">66% regain all weight + more within 12 months of stopping.</p>
+              </div>
+            </li>
+            <li class="flex gap-4">
+              <div class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center shrink-0 text-red-500 font-bold">
+                <i class="fas fa-times"></i>
+              </div>
+              <div>
+                <p class="font-bold text-gray-900">Lifetime Dependency</p>
+                <p class="text-slate-600 text-sm">You are a customer for life. Stop paying, stop losing.</p>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <!-- The New Way (Pleasure) -->
+        <div class="bg-white border-2 border-[#209c91] rounded-b-[2rem] md:rounded-[2rem] p-10 relative overflow-hidden shadow-2xl transform md:-translate-y-4 z-10">
+          <div class="absolute top-0 left-0 w-full h-2 bg-[#209c91]"></div>
+          <div class="absolute top-4 right-4 bg-[#209c91] text-white text-xs font-bold px-3 py-1 rounded-full">RECOMMENDED</div>
+          
+          <h3 class="text-gray-900 text-2xl font-bold mb-2 font-playfair_display">The Metabolic Reset</h3>
+          <p class="text-[#209c91] text-sm font-bold uppercase tracking-wider mb-8">ProLongevity Method</p>
+          
+          <ul class="space-y-6">
+            <li class="flex gap-4">
+              <div class="w-8 h-8 rounded-full bg-teal-100 flex items-center justify-center shrink-0 text-[#209c91] font-bold">
+                <i class="fas fa-check"></i>
+              </div>
+              <div>
+                <p class="font-bold text-gray-900">Fat Loss, Not Muscle</p>
+                <p class="text-slate-600 text-sm">We target visceral fat while protecting your metabolic engine.</p>
+              </div>
+            </li>
+            <li class="flex gap-4">
+              <div class="w-8 h-8 rounded-full bg-teal-100 flex items-center justify-center shrink-0 text-[#209c91] font-bold">
+                <i class="fas fa-check"></i>
+              </div>
+              <div>
+                <p class="font-bold text-gray-900">Metabolic Flexibility</p>
+                <p class="text-slate-600 text-sm">Teach your body to burn fuel correctly so the weight <i>stays</i> off.</p>
+              </div>
+            </li>
+            <li class="flex gap-4">
+              <div class="w-8 h-8 rounded-full bg-teal-100 flex items-center justify-center shrink-0 text-[#209c91] font-bold">
+                <i class="fas fa-check"></i>
+              </div>
+              <div>
+                <p class="font-bold text-gray-900">Freedom</p>
+                <p class="text-slate-600 text-sm">No pills. No injections. Just data and food. You are in control.</p>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. DEEP DIVE CASE STUDIES (The Hero's Journey) -->
+  <section class="relative py-32 bg-slate-50 overflow-hidden">
+    <div class="max-w-[1200px] mx-auto px-6 relative z-10">
+      
+      <div class="text-center mb-20">
+        <h2 class="text-gray-900 text-4xl md:text-5xl font-bold font-playfair_display mb-4">
+          Real Stories. Verified Data.
+        </h2>
+        <p class="text-slate-600 text-lg">We don't just share quotes. We share clinical outcomes.</p>
+      </div>
+
+      <!-- Case Study 1: Robert -->
+      <div class="bg-white rounded-[2.5rem] shadow-xl overflow-hidden mb-16 border border-gray-100">
+        <div class="grid grid-cols-1 lg:grid-cols-2">
+          <div class="p-10 md:p-16 flex flex-col justify-center">
+            <div class="flex items-center gap-3 mb-6">
+              <span class="bg-purple-100 text-prolongevity-purple text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">Hypertension Reversed</span>
+              <span class="bg-teal-100 text-[#209c91] text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">Weight Loss</span>
+            </div>
+            <h3 class="text-3xl md:text-4xl font-bold text-gray-900 font-playfair_display mb-6">
+              "I dropped the statins immediately."
+            </h3>
+            <div class="space-y-4 mb-8">
+              <p class="text-slate-600 text-lg">
+                <span class="font-bold text-gray-900">The Struggle:</span> Robert struggled with weight his entire adult life. 15 years ago, he developed high blood pressure and was put on statins, which made him feel ill.
+              </p>
+              <p class="text-slate-600 text-lg">
+                <span class="font-bold text-gray-900">The Pivot:</span> Using CGM, Robert realized his "healthy" breakfast was spiking his sugar. He cut the carbs, not the calories.
+              </p>
+              <p class="text-slate-600 text-lg">
+                <span class="font-bold text-gray-900">The Result:</span> 4.5 stone lost. 5 inches off waist. Off all medication. Maintained for 14+ months.
+              </p>
+            </div>
+            <div class="flex items-center gap-4">
+              <div class="text-center px-4 py-2 bg-slate-50 rounded-lg border border-slate-100">
+                <p class="text-2xl font-bold text-prolongevity-purple">-4.5</p>
+                <p class="text-xs text-slate-500 uppercase font-bold">Stone</p>
+              </div>
+              <div class="text-center px-4 py-2 bg-slate-50 rounded-lg border border-slate-100">
+                <p class="text-2xl font-bold text-prolongevity-purple">0</p>
+                <p class="text-xs text-slate-500 uppercase font-bold">Meds</p>
+              </div>
+            </div>
+          </div>
+          <div class="relative h-[400px] lg:h-auto bg-gray-200">
+            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=1000&q=85" class="absolute inset-0 w-full h-full object-cover" alt="Robert Success Story">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+            <div class="absolute bottom-8 left-8 text-white">
+              <p class="font-bold text-xl">Robert M.</p>
+              <p class="text-sm opacity-90">Sheffield, UK</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Case Study 2: Roshni -->
+      <div class="bg-white rounded-[2.5rem] shadow-xl overflow-hidden border border-gray-100">
+        <div class="grid grid-cols-1 lg:grid-cols-2">
+          <div class="relative h-[400px] lg:h-auto bg-gray-200 order-2 lg:order-1">
+            <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=1000&q=85" class="absolute inset-0 w-full h-full object-cover" alt="Roshni Success Story">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+            <div class="absolute bottom-8 left-8 text-white">
+              <p class="font-bold text-xl">Roshni</p>
+              <p class="text-sm opacity-90">Verified Member</p>
+            </div>
+          </div>
+          <div class="p-10 md:p-16 flex flex-col justify-center order-1 lg:order-2">
+            <div class="flex items-center gap-3 mb-6">
+              <span class="bg-purple-100 text-prolongevity-purple text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">Mental Clarity</span>
+              <span class="bg-teal-100 text-[#209c91] text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">Blood Pressure</span>
+            </div>
+            <h3 class="text-3xl md:text-4xl font-bold text-gray-900 font-playfair_display mb-6">
+              "I physically feel better."
+            </h3>
+            <div class="space-y-4 mb-8">
+              <p class="text-slate-600 text-lg">
+                <span class="font-bold text-gray-900">The Struggle:</span> Roshni was dealing with high blood pressure, skin issues, and a general lack of energy. She felt stuck.
+              </p>
+              <p class="text-slate-600 text-lg">
+                <span class="font-bold text-gray-900">The Pivot:</span> She joined the cohort. The group accountability combined with Graham's data analysis showed her exactly which foods were causing inflammation.
+              </p>
+              <p class="text-slate-600 text-lg">
+                <span class="font-bold text-gray-900">The Result:</span> Blood pressure normalized. Skin cleared up. Mental fog lifted.
+              </p>
+            </div>
+            <div class="flex items-center gap-4">
+              <div class="text-center px-4 py-2 bg-slate-50 rounded-lg border border-slate-100">
+                <p class="text-2xl font-bold text-prolongevity-purple">Normal</p>
+                <p class="text-xs text-slate-500 uppercase font-bold">BP</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 4. CLINICAL VALIDATION (Dr. Bhasha) -->
+  <section class="relative py-32 bg-white overflow-hidden border-t border-gray-100">
+    <div class="max-w-[1400px] mx-auto px-6 relative z-10">
+      <div class="text-center mb-16">
+        <p class="font-bold tracking-[3px] text-sm uppercase text-[#209c91] mb-4">MEDICAL ENDORSEMENT</p>
+        <h2 class="text-gray-900 text-4xl md:text-5xl font-bold font-playfair_display">
+          "This is what medical school <br/>never taught me."
+        </h2>
+      </div>
+
+      <div class="relative bg-prolongevity-dark rounded-[2.5rem] shadow-2xl overflow-hidden">
+        <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+        <div class="grid grid-cols-1 lg:grid-cols-12 items-center">
+          <div class="lg:col-span-4">
+            <img src="https://c.animaapp.com/mid2jdlgjgsquY/img/ht_191217_mpm_bhasha_miss_england_800x450.png" class="w-full h-full object-cover min-h-[400px]" alt="Dr Bhasha">
+          </div>
+          <div class="lg:col-span-8 p-10 md:p-16 text-white">
+            <blockquote class="text-2xl md:text-3xl font-playfair_display leading-relaxed italic mb-8">
+              "My mother was pre-diabetic with high blood pressure. Standard advice wasn't working. Through ProLongevity, we understood her unique response to food. Her blood pressure normalized and she avoided diabetes medication."
+            </blockquote>
+            <div>
+              <p class="text-xl font-bold text-[#209c91]">Dr. Bhasha Mukherjee</p>
+              <p class="text-white/70 text-sm uppercase tracking-wider">Junior Doctor • Diabetes UK Ambassador • Miss England 2019</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. FINAL CTA (Scarcity) -->
+  <section class="relative py-24 bg-gradient-to-br from-prolongevity-dark via-purple-900/95 to-prolongevity-dark overflow-hidden text-white">
+    <div class="absolute top-0 left-0 w-[800px] h-[800px] bg-purple-600/20 rounded-full blur-[150px] pointer-events-none"></div>
+    <div class="absolute bottom-0 right-0 w-[600px] h-[600px] bg-teal-500/10 rounded-full blur-[120px] pointer-events-none"></div>
+
+    <div class="max-w-[1000px] mx-auto px-6 relative z-10 text-center">
+      
+      <h2 class="text-white text-4xl md:text-6xl font-bold font-playfair_display mb-6 leading-tight">
+        Stop Guessing. Start Living.
+      </h2>
+      <p class="text-white/80 text-xl max-w-2xl mx-auto leading-relaxed mb-10 font-medium">
+        The January 6th cohort is nearly full. Once it starts, the next group won't begin until March. Don't wait for the next rebound.
+      </p>
+
+      <button class="group relative flex items-center justify-center gap-3 text-white text-[19px] font-bold px-14 py-6 rounded-full shadow-2xl transition-all duration-500 hover:-translate-y-3 hover:scale-110 mx-auto overflow-hidden" style="background: linear-gradient(135deg, #209c91 0%, #1a8078 100%); box-shadow: 0 20px 60px rgba(32, 156, 145, 0.3);">
+        <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+        <span class="relative z-10 flex items-center gap-3">
+          <i class="fas fa-lock text-2xl"></i>
+          Secure Your Spot - January 6th Cohort
+        </span>
+      </button>
+      
+      <p class="text-white/60 text-sm mt-6">
+        100% Money-back guarantee if you don't see results in 8 weeks.
+      </p>
+
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="relative bg-gradient-to-br from-prolongevity-dark via-purple-900/95 to-prolongevity-dark overflow-hidden border-t border-white/5">
+    <div class="max-w-[1680px] mx-auto px-6 md:px-[60px] relative z-10 py-16">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-12">
+        <div>
+          <h4 class="text-white text-base font-bold mb-6 tracking-wide">The Programme</h4>
+          <ul class="space-y-4 text-sm text-white/70 font-medium">
+            <li><a href="index.html#how-it-works" class="hover:text-white transition-colors">How It Works</a></li>
+            <li><a href="pricing.html" class="hover:text-white transition-colors">Pricing</a></li>
+            <li><a href="outcomes.html" class="hover:text-white transition-colors">Success Stories</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="text-white text-base font-bold mb-6 tracking-wide">Resources</h4>
+          <ul class="space-y-4 text-sm text-white/70 font-medium">
+            <li><a href="#" class="hover:text-white transition-colors">Webinar</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">Blog</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="text-white text-base font-bold mb-6 tracking-wide">Contact</h4>
+          <ul class="space-y-4 text-sm text-white/70 font-medium">
+            <li><a href="mailto:contact@prolongevity.co.uk" class="hover:text-white transition-colors">contact@prolongevity.co.uk</a></li>
+            <li>+44 7768 275802</li>
+          </ul>
+        </div>
+        <div>
+          <div class="flex items-center gap-2 text-white/80 text-sm mb-4">
+            <i class="fas fa-award" style="color: #209c91;"></i>
+            <span class="font-semibold">Award Winning</span>
+          </div>
+          <p class="text-white/50 text-xs">© 2025 ProLongevity. All rights reserved.</p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
